@@ -289,7 +289,9 @@ class PaymentsTab extends ImmutableComponent {
             showOverlay={this.props.showOverlay}
             siteSettings={this.props.siteSettings}
           />
-          : <DisabledContent />
+          : <DisabledContent
+            ledgerData={this.props.ledgerData}
+          />
       }
     </div>
   }
@@ -307,7 +309,6 @@ const styles = StyleSheet.create({
 
   paymentsContainer: {
     position: 'relative',
-    overflowX: 'hidden',
     width: '805px',
     paddingBottom: '40px' // cf: padding of .prefTabContainer
   },

@@ -315,6 +315,13 @@ const globalStyles = {
         background: '#ccc'
       }
     }
+  },
+
+  // TODO (Suguru): move them to payment.js after style refactoring is done
+  payments: {
+    fontSize: {
+      regular: '14.5px'
+    }
   }
 }
 

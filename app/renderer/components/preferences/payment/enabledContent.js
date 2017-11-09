@@ -5,6 +5,7 @@
 const React = require('react')
 const {StyleSheet, css} = require('aphrodite')
 const moment = require('moment')
+const Immutable = require('immutable')
 
 // util
 const {batToCurrencyString, formatCurrentBalance, formattedDateFromTimestamp, walletStatus} = require('../../../../common/lib/ledgerUtil')
@@ -25,6 +26,7 @@ const LedgerTable = require('./ledgerTable')
 const globalStyles = require('../../styles/global')
 const {paymentStyles, paymentStylesVariables} = require('../../styles/payment')
 const {loaderAnimation} = require('../../styles/animations')
+const closeButton = require('../../../../../img/toolbar/stoploading_btn.svg')
 const cx = require('../../../../../js/lib/classSet')
 
 // Actions
@@ -33,6 +35,12 @@ const appActions = require('../../../../../js/actions/appActions')
 // TODO: report when funds are too low
 // TODO: support non-USD currency
 class EnabledContent extends ImmutableComponent {
+  constructor (props) {
+    super(props)
+    this.claimButton = this.claimButton.bind(this)
+    this.onClaimClick = this.onClaimClick.bind(this)
+  }
+
   walletButton () {
     const ledgerData = this.props.ledgerData
     const buttonText = ledgerData.get('created')
@@ -58,6 +66,33 @@ class EnabledContent extends ImmutableComponent {
       })}
         href='https://brave.com/faq-payments/#brave-payments'
         target='_blank' rel='noopener'
+      />
+    </div>
+  }
+
+  onClaimClick () {
+    appActions.onPromotionClaim()
+  }
+
+  claimButton () {
+    const ledgerData = this.props.ledgerData || Immutable.Map()
+    const promotion = ledgerData.get('promotion')
+
+    if (promotion == null || promotion.isEmpty() || promotion.has('claimedTimestamp') || !ledgerData.get('created')) {
+      return null
+    }
+
+    return <div>
+      <BrowserButton
+        custom={[
+          styles.claimButton
+        ]}
+        secondaryColor
+        panelItem
+        testId={'claimButton'}
+        onClick={this.onClaimClick}
+        disabled={!ledgerData.get('created')}
+        label={promotion.getIn(['panel', 'optedInButton'])}
       />
     </div>
   }
@@ -168,6 +203,36 @@ class EnabledContent extends ImmutableComponent {
     </section>
   }
 
+  closeClick () {
+    appActions.onPromotionRemoval()
+  }
+
+  successMessage () {
+    const promo = this.props.ledgerData.get('promotion') || Immutable.Map()
+    const successText = promo.getIn(['panel', 'successText'])
+
+    if (!successText || !promo.has('claimedTimestamp')) {
+      return
+    }
+
+    return <div className={cx({[css(styles.enabledContent__grant)]: true, 'enabledContent__grant': true})}>
+      <div
+        className={css(styles.enabledContent__grant_close)}
+        onClick={this.closeClick}
+      />
+      <p className={css(styles.enabledContent__grant_title)} dangerouslySetInnerHTML={{ __html: successText }} />
+      <p className={css(styles.enabledContent__grant_text)}>
+        {promo.getIn(['panel', 'disclaimer'])}
+      </p>
+      <BrowserButton
+        secondaryColor
+        l10nId={'ok'}
+        custom={styles.enabledContent__grant_button}
+        onClick={this.closeClick}
+      />
+    </div>
+  }
+
   render () {
     const ledgerData = this.props.ledgerData
     const walletStatusText = walletStatus(ledgerData)
@@ -193,7 +258,9 @@ class EnabledContent extends ImmutableComponent {
             <tr className={css(styles.tableTr)}>
               <th className={css(styles.walletBar__tableTr__tableTh)} data-l10n-id='monthlyBudget' />
               <th className={css(styles.walletBar__tableTr__tableTh)} data-l10n-id='accountBalance' />
-              <th className={css(styles.walletBar__tableTr__tableTh)} />
+              <th className={css(styles.walletBar__tableTr__tableTh)}>
+                {this.claimButton()}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -252,6 +319,7 @@ class EnabledContent extends ImmutableComponent {
                   data-l10n-id={walletStatusText.id}
                   data-l10n-args={walletStatusText.args ? JSON.stringify(walletStatusText.args) : null}
                 />
+                {this.successMessage()}
               </td>
             </tr>
           </tbody>
@@ -272,6 +340,7 @@ class EnabledContent extends ImmutableComponent {
 
 const styles = StyleSheet.create({
   walletBar: {
+    position: 'relative',
     background: globalStyles.color.lightGray,
     borderRadius: globalStyles.radius.borderRadiusUIbox,
     padding: globalStyles.spacing.panelPadding,
@@ -324,6 +393,17 @@ const styles = StyleSheet.create({
     marginBottom: 0
   },
 
+  balance__iconLink: {
+    color: globalStyles.color.mediumGray,
+    fontSize: globalStyles.payments.fontSize.regular,
+    marginLeft: '5px',
+    textDecoration: 'none',
+
+    ':hover': {
+      textDecoration: 'none !important'
+    }
+  },
+
   iconLink: {
     textDecoration: 'none',
 
@@ -332,42 +412,8 @@ const styles = StyleSheet.create({
     }
   },
 
-  iconText: {
-    color: globalStyles.color.mediumGray,
-    margin: '0 0 0 5px',
-
-    // TODO: refactor preferences.less to remove !important
-    fontSize: `${globalStyles.fontSize.settingItemSubtext} !important`
-  },
-
-  contribution: {
-    lineHeight: 1.5
-  },
-
-  lastContribution: {
-    marginTop: '16px',
-    marginBottom: 0
-  },
-
-  nextContribution: {
-    marginTop: '15px',
-    marginBottom: 0
-  },
-
-  walletStatus: {
-    marginTop: '15px',
-    lineHeight: 1.5
-  },
-
-  balance__iconLink: {
-    color: globalStyles.color.mediumGray,
-    fontSize: globalStyles.fontSize.settingItemSubtext,
-    marginLeft: '5px',
-    textDecoration: 'none',
-
-    ':hover': {
-      textDecoration: 'none !important'
-    }
+  claimButton: {
+    marginTop: '-10px'
   },
 
   enabledContent: {
@@ -400,6 +446,52 @@ const styles = StyleSheet.create({
     opacity: 1,
     transform: 'translateX(0)',
     transition: 'opacity .4s ease-out'
+  },
+
+  enabledContent__grant: {
+    position: 'absolute',
+    zIndex: 3,
+    top: 0,
+    left: 0,
+    width: '100%',
+    background: '#f3f3f3',
+    borderRadius: '8px',
+    padding: '30px 50px 20px',
+    boxSizing: 'border-box',
+    boxShadow: '4px 6px 3px #dadada'
+  },
+
+  enabledContent__grant_close: {
+    position: 'absolute',
+    right: '15px',
+    top: '15px',
+    height: '15px',
+    width: '15px',
+    cursor: 'pointer',
+
+    background: `url(${closeButton}) center no-repeat`,
+    backgroundSize: `15px`,
+
+    ':focus': {
+      outline: 'none'
+    }
+  },
+
+  enabledContent__grant_title: {
+    color: '#5f5f5f',
+    fontSize: '20px',
+    display: 'block',
+    marginBottom: '10px'
+  },
+
+  enabledContent__grant_text: {
+    fontSize: '16px',
+    color: '#9b9b9b',
+    maxWidth: '600px'
+  },
+
+  enabledContent__grant_button: {
+    float: 'right'
   },
 
   loader__text: {
