@@ -5,6 +5,7 @@
 const React = require('react')
 const {StyleSheet, css} = require('aphrodite')
 const privateTabIcon = require('../../app/extensions/brave/img/newtab/private_tab_pagearea_icon.svg')
+const ddgIcon = require('../../app/extensions/brave/img/newtab/private_tab_pagearea_ddgicon.svg')
 const globalStyles = require('../../app/renderer/components/styles/global')
 const { theme } = require('../../app/renderer/components/styles/theme')
 const {SettingCheckbox} = require('../../app/renderer/components/common/settings')
@@ -33,25 +34,38 @@ class NewPrivateTab extends React.Component {
         <Clock />
       </div>
       <div className={css(styles.wrapper)}>
-        <div className={css(styles.lionImage)} />
+        <div className={css(styles.iconGutter, styles.lionImage)} />
         <div className={css(styles.textWrapper)}>
           <h1 className={css(styles.title)} data-l10n-id='privateTabTitle' />
           <p className={css(styles.text)} data-l10n-id='privateTabText1' />
-          <p className={css(styles.text)} data-l10n-id='privateTabText2' />
           <p className={css(styles.text, styles.italic)} data-l10n-id='privateTabText3' />
-          <h2 className={css(styles.sectionTitle)} data-l10n-id='privateTabSearchSectionTitle' />
-          <p className={css(styles.text)} data-l10n-id='privateTabSearchText1' />
-          {
-            this.props.newTabData.hasIn(useAlternativePrivateSearchEngineDataKeys) &&
+        </div>
+      </div>
+      {
+        this.props.newTabData.hasIn(useAlternativePrivateSearchEngineDataKeys) &&
+        <div className={css(styles.wrapper)}>
+          <div className={css(styles.iconGutter)}>
+            <img className={css(styles.ddgImage)} src={ddgIcon} alt='DuckDuckGo logo' />
+          </div>
+          <div className={css(styles.textWrapper)}>
             <SettingCheckbox
+              switchClassName={css(styles.newPrivateTab__switch)}
+              rightLabelClassName={css(styles.newPrivateTab__switch__label)}
               dataL10nId='useDuckDuckGoForPrivateSearch'
               checked={Boolean(this.props.newTabData.getIn(useAlternativePrivateSearchEngineDataKeys))}
               onChange={this.onChangePrivateSearch.bind(this)}
-              rightLabelClassName={css(styles.newPrivateTab__switch__label)}
             />
-          }
-        </div>
+            {/* <h2 className={css(styles.sectionTitle)} data-l10n-id='privateTabSearchSectionTitle' /> */}
+            <p className={css(styles.text)} data-l10n-id='privateTabSearchText1' />
+            <a
+              className={css(styles.newPrivateTab__ddgLink)}
+              href='https://duckduckgo.com/about'
+            >
+              DuckDuckGo and your privacy
+            </a>
+          </div>
       </div>
+      }
     </div>
   }
 }
@@ -88,7 +102,8 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignSelf: 'center',
     maxWidth: '780px',
-    padding: `${globalStyles.spacing.privateTabPaddingHorizontal} 0`,
+    margin: `${globalStyles.spacing.privateTabPaddingHorizontal} 0`,
+    marginBottom: 0,
 
     [atBreakpoint]: {
       flexDirection: 'column'
@@ -96,8 +111,8 @@ const styles = StyleSheet.create({
   },
 
   textWrapper: {
-    padding: `14px ${globalStyles.spacing.privateTabPadding}`,
-
+    margin: `0 ${globalStyles.spacing.privateTabPadding}`,
+    marginBottom: 0,
     [atBreakpoint]: {
       padding: '14px 0',
       alignSelf: 'center',
@@ -106,22 +121,37 @@ const styles = StyleSheet.create({
     }
   },
 
+  iconGutter: {
+    minWidth: '80px',
+    minHeight: '100px',
+    display: 'flex',
+    // position contents at the top right
+    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
+    flexDirection: 'row',
+
+    [atBreakpoint]: {
+      alignSelf: 'center',
+      // position contents in the middle
+      justifyContent: 'center'
+    }
+  },
+
   lionImage: {
     backgroundImage: `url(${privateTabIcon})`,
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center top',
-    backgroundSize: 'contain',
-    minWidth: '80px',
-    minHeight: '100px',
+    backgroundSize: 'contain'
+  },
 
-    [atBreakpoint]: {
-      alignSelf: 'center'
-    }
+  ddgImage: {
+    width: '45px'
   },
 
   title: {
     color: globalStyles.color.white100,
     fontSize: '30px',
+    marginTop: '14px',
     marginBottom: globalStyles.spacing.privateTabPaddingHorizontal
   },
 
@@ -132,7 +162,9 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    paddingBottom: globalStyles.spacing.privateTabPaddingHorizontal,
+    ':not(:last-of-type)': {
+      paddingBottom: globalStyles.spacing.privateTabPaddingHorizontal
+    },
     lineHeight: '1.5',
     fontSize: '17px',
     color: globalStyles.color.alphaWhite
@@ -142,8 +174,23 @@ const styles = StyleSheet.create({
     fontStyle: 'italic'
   },
 
+  newPrivateTab__switch: {
+    marginTop: '7px',
+    marginBottom: '14px'
+  },
+
   newPrivateTab__switch__label: {
-    color: globalStyles.color.alphaWhite
+    color: globalStyles.color.alphaWhite,
+    fontWeight: 'bold'
+  },
+
+  newPrivateTab__ddgLink: {
+    display: 'block',
+    textDecoration: 'underline',
+    marginTop: '10px',
+    color: globalStyles.color.white100,
+    fontSize: '14px',
+    textAlign: 'right'
   }
 })
 
