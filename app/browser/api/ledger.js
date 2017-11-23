@@ -160,7 +160,7 @@ const addFoundClosed = (state) => {
     clearTimeout(balanceTimeoutId)
   }
   const balanceFn = module.exports.getBalance.bind(null, state)
-  balanceTimeoutId = setTimeout(balanceFn, 5 * ledgerUtil.miliseconds.second)
+  balanceTimeoutId = setTimeout(balanceFn, 5 * ledgerUtil.milliseconds.second)
 }
 
 const boot = () => {
@@ -200,7 +200,7 @@ const onBootStateFile = (state) => {
   }
 
   if (client.sync(callback) === true) {
-    run(random.randomInt({min: ledgerUtil.miliseconds.minute, max: 10 * ledgerUtil.miliseconds.minute}))
+    run(random.randomInt({min: ledgerUtil.milliseconds.minute, max: 10 * ledgerUtil.milliseconds.minute}))
   }
 
   module.exports.getBalance(state)
@@ -301,16 +301,16 @@ const getPublisherData = (result, scorekeeper) => {
     })
   }
 
-  if (duration >= ledgerUtil.miliseconds.day) {
-    data.daysSpent = Math.max(Math.round(duration / ledgerUtil.miliseconds.day), 1)
-  } else if (duration >= ledgerUtil.miliseconds.hour) {
-    data.hoursSpent = Math.max(Math.floor(duration / ledgerUtil.miliseconds.hour), 1)
-    data.minutesSpent = Math.round((duration % ledgerUtil.miliseconds.hour) / ledgerUtil.miliseconds.minute)
-  } else if (duration >= ledgerUtil.miliseconds.minute) {
-    data.minutesSpent = Math.max(Math.floor(duration / ledgerUtil.miliseconds.minute), 1)
-    data.secondsSpent = Math.round((duration % ledgerUtil.miliseconds.minute) / ledgerUtil.miliseconds.second)
+  if (duration >= ledgerUtil.milliseconds.day) {
+    data.daysSpent = Math.max(Math.round(duration / ledgerUtil.milliseconds.day), 1)
+  } else if (duration >= ledgerUtil.milliseconds.hour) {
+    data.hoursSpent = Math.max(Math.floor(duration / ledgerUtil.milliseconds.hour), 1)
+    data.minutesSpent = Math.round((duration % ledgerUtil.milliseconds.hour) / ledgerUtil.milliseconds.minute)
+  } else if (duration >= ledgerUtil.milliseconds.minute) {
+    data.minutesSpent = Math.max(Math.floor(duration / ledgerUtil.milliseconds.minute), 1)
+    data.secondsSpent = Math.round((duration % ledgerUtil.milliseconds.minute) / ledgerUtil.milliseconds.second)
   } else {
-    data.secondsSpent = Math.max(Math.round(duration / ledgerUtil.miliseconds.second), 1)
+    data.secondsSpent = Math.max(Math.round(duration / ledgerUtil.milliseconds.second), 1)
   }
 
   if (_internal.verboseP) {
@@ -579,7 +579,7 @@ const excludeP = (publisherKey, callback) => {
   }
 
   if (!v2RulesetDB) {
-    return setTimeout(() => excludeP(publisherKey, callback), 5 * ledgerUtil.miliseconds.second)
+    return setTimeout(() => excludeP(publisherKey, callback), 5 * ledgerUtil.milliseconds.second)
   }
 
   inspectP(v2RulesetDB, v2RulesetPath, publisherKey, 'exclude', 'domain:' + publisherKey, (err, result) => {
@@ -1102,12 +1102,12 @@ const enable = (state, paymentsEnabled) => {
     if (!promotionTimeoutId) {
       clearInterval(promotionTimeoutId)
     }
-    promotionTimeoutId = setInterval(getPromotion, 24 * ledgerUtil.miliseconds.hour)
+    promotionTimeoutId = setInterval(getPromotion, 24 * ledgerUtil.milliseconds.hour)
 
     if (!togglePromotionTimeoutId) {
       clearTimeout(togglePromotionTimeoutId)
     }
-    togglePromotionTimeoutId = setTimeout(getPromotion, 15 * ledgerUtil.miliseconds.second)
+    togglePromotionTimeoutId = setTimeout(getPromotion, 15 * ledgerUtil.milliseconds.second)
   } else if (paymentsEnabled) {
     // on toggle
     const promotion = ledgerState.getPromotionNotification(state)
@@ -1349,7 +1349,7 @@ const observeTransactions = (state, transactions) => {
 // TODO convert this function and related ones to immutable
 const getStateInfo = (state, parsedData) => {
   const info = parsedData.paymentInfo
-  const then = new Date().getTime() - ledgerUtil.miliseconds.year
+  const then = new Date().getTime() - ledgerUtil.milliseconds.year
 
   if (!parsedData.properties.wallet) {
     return state
@@ -1568,7 +1568,7 @@ const setPaymentInfo = (amount) => {
     // wallet being created...
     return setTimeout(function () {
       setPaymentInfo(amount)
-    }, 2 * ledgerUtil.miliseconds.second)
+    }, 2 * ledgerUtil.milliseconds.second)
   }
 
   amount = parseInt(amount, 10)
@@ -1613,7 +1613,7 @@ const getBalance = (state) => {
   if (!client) return
 
   const balanceFn = module.exports.getBalance.bind(null, state)
-  balanceTimeoutId = setTimeout(balanceFn, 1 * ledgerUtil.miliseconds.minute)
+  balanceTimeoutId = setTimeout(balanceFn, 1 * ledgerUtil.milliseconds.minute)
   return getPaymentInfo(state)
 }
 
@@ -1628,7 +1628,7 @@ const callback = (err, result, delayTime) => {
     if (!client) return
 
     if (typeof delayTime === 'undefined') {
-      delayTime = random.randomInt({min: ledgerUtil.miliseconds.minute, max: 10 * ledgerUtil.miliseconds.minute})
+      delayTime = random.randomInt({min: ledgerUtil.milliseconds.minute, max: 10 * ledgerUtil.milliseconds.minute})
     }
   }
 
@@ -1853,7 +1853,7 @@ const onInitRead = (state, parsedData) => {
     }
 
     appActions.onLedgerFirstSync(parsedData)
-  }, 3 * ledgerUtil.miliseconds.second)
+  }, 3 * ledgerUtil.milliseconds.second)
 
   // Make sure bravery props are up-to-date with user settings
   const address = ledgerState.getInfoProp(state, 'address')
@@ -1880,7 +1880,7 @@ const onTimeUntilReconcile = (state, stateResult) => {
 
 const onLedgerFirstSync = (state, parsedData) => {
   if (client.sync(callback) === true) {
-    run(state, random.randomInt({min: ledgerUtil.miliseconds.minute, max: 10 * ledgerUtil.miliseconds.minute}))
+    run(state, random.randomInt({min: ledgerUtil.milliseconds.minute, max: 10 * ledgerUtil.milliseconds.minute}))
   }
 
   return cacheRuleSet(state, parsedData.ruleset)
@@ -1970,7 +1970,7 @@ const run = (state, delayTime) => {
       delayTime = false
     }
     if (delayTime === false) {
-      delayTime = random.randomInt({min: ledgerUtil.miliseconds.minute, max: 10 * ledgerUtil.miliseconds.minute})
+      delayTime = random.randomInt({min: ledgerUtil.milliseconds.minute, max: 10 * ledgerUtil.milliseconds.minute})
     }
   }
 
@@ -1978,8 +1978,8 @@ const run = (state, delayTime) => {
     if (runTimeoutId) return
 
     const active = client
-    if (delayTime > (1 * ledgerUtil.miliseconds.hour)) {
-      delayTime = random.randomInt({min: 3 * ledgerUtil.miliseconds.minute, max: ledgerUtil.miliseconds.hour})
+    if (delayTime > (1 * ledgerUtil.milliseconds.hour)) {
+      delayTime = random.randomInt({min: 3 * ledgerUtil.milliseconds.minute, max: ledgerUtil.milliseconds.hour})
     }
 
     runTimeoutId = setTimeout(() => {
@@ -2007,7 +2007,7 @@ const networkConnected = () => {
     if (!client) return
 
     appActions.onNetworkConnected()
-  }, 1 * ledgerUtil.miliseconds.minute, true)
+  }, 1 * ledgerUtil.milliseconds.minute, true)
 }
 
 const onNetworkConnected = (state) => {
@@ -2017,13 +2017,13 @@ const onNetworkConnected = (state) => {
   }
 
   if (client.sync(callback) === true) {
-    const delayTime = random.randomInt({min: ledgerUtil.miliseconds.minute, max: 10 * ledgerUtil.miliseconds.minute})
+    const delayTime = random.randomInt({min: ledgerUtil.milliseconds.minute, max: 10 * ledgerUtil.milliseconds.minute})
     run(state, delayTime)
   }
 
   if (balanceTimeoutId) clearTimeout(balanceTimeoutId)
   const newBalance = module.exports.getBalance.bind(null, state)
-  balanceTimeoutId = setTimeout(newBalance, 5 * ledgerUtil.miliseconds.second)
+  balanceTimeoutId = setTimeout(newBalance, 5 * ledgerUtil.milliseconds.second)
 }
 
 const muonWriter = (fileName, payload) => {
@@ -2215,7 +2215,10 @@ const transitionWalletToBat = () => {
       console.log('ledger client is currently busy; transition will be retried on next launch')
       return
     }
-    const delayTime = random.randomInt({ min: ledgerUtil.miliseconds.minute, max: 10 * ledgerUtil.miliseconds.minute })
+    const delayTime = random.randomInt({
+      min: ledgerUtil.milliseconds.minute,
+      max: 10 * ledgerUtil.milliseconds.minute
+    })
     console.log('ledger client is currently busy; transition will be retried shortly (this was attempt ' + busyRetryCount + ')')
     setTimeout(() => transitionWalletToBat(), delayTime)
     return
@@ -2232,7 +2235,10 @@ const transitionWalletToBat = () => {
         client = newClient
         newClient = true
         // NOTE: onLedgerCallback will save latest client to disk as ledger-state.json
-        appActions.onLedgerCallback(result, random.randomInt({ min: ledgerUtil.miliseconds.minute, max: 10 * ledgerUtil.miliseconds.minute }))
+        appActions.onLedgerCallback(result, random.randomInt({
+          min: ledgerUtil.milliseconds.minute,
+          max: 10 * ledgerUtil.milliseconds.minute
+        }))
         appActions.onBitcoinToBatTransitioned()
         ledgerNotifications.showBraveWalletUpdated()
         client.publisherTimestamp((err, result) => {

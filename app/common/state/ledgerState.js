@@ -391,7 +391,7 @@ const ledgerState = {
       }
     }
 
-    return state.setIn(['ledger', 'promotion', 'activeState'], active)
+    return ledgerState.setPromotionProp(state, 'activeState', active)
   },
 
   getActivePromotion: (state) => {
@@ -417,16 +417,13 @@ const ledgerState = {
 
   removePromotion: (state) => {
     state = validateState(state)
-
-    let promotion = Immutable.fromJS({})
-
-    return state.setIn(['ledger', 'promotion'], promotion)
+    return state.setIn(['ledger', 'promotion'], Immutable.Map())
   },
 
   remindMeLater: (state, time) => {
     const ledgerUtil = require('../lib/ledgerUtil')
     if (time == null) {
-      time = 24 * ledgerUtil.miliseconds.hour
+      time = 24 * ledgerUtil.milliseconds.hour
     }
 
     state = validateState(state)
@@ -454,6 +451,11 @@ const ledgerState = {
     }
 
     const active = state.getIn(['ledger', 'promotion', 'activeState'])
+
+    if (active == null) {
+      return state
+    }
+
     const path = ['ledger', 'promotion', 'stateWallet', active, 'notification', prop]
 
     return state.setIn(path, value)
