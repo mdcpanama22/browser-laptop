@@ -41,7 +41,7 @@
      const text = this.props.ledgerData.getIn(['promotion', 'panel', 'optInMarkup'])
      const claimed = this.props.ledgerData.has('claimedTimestamp')
 
-     if (!text || !claimed) {
+     if (!text || claimed) {
        return
      }
 

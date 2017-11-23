@@ -55,7 +55,8 @@ describe('ledgerReducer unit tests', function () {
       onNetworkConnected: dummyModifyState,
       getNewClient: () => {},
       claimPromotion: () => {},
-      onPromotionResponse: dummyModifyState
+      onPromotionResponse: dummyModifyState,
+      getPromotion: () => {}
     }
     fakeLedgerState = {
       resetSynopsis: dummyModifyState,
@@ -715,6 +716,25 @@ describe('ledgerReducer unit tests', function () {
         actionType: appConstants.APP_ON_LEDGER_NOTIFICATION_INTERVAL
       }))
       assert(onIntervalSpy.calledOnce)
+    })
+  })
+
+  describe('APP_ON_PROMOTION_GET', function () {
+    let getPromotionSpy
+
+    before(function () {
+      getPromotionSpy = sinon.spy(fakeLedgerApi, 'getPromotion')
+    })
+
+    after(function () {
+      getPromotionSpy.restore()
+    })
+
+    it('execute', function () {
+      ledgerReducer(appState, Immutable.fromJS({
+        actionType: appConstants.APP_ON_PROMOTION_GET
+      }))
+      assert(getPromotionSpy.calledOnce)
     })
   })
 })

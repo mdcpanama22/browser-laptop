@@ -1366,14 +1366,24 @@ describe('ledger api unit tests', function () {
     it('empty client', function () {
       const oldClient = ledgerApi.getClient()
       ledgerApi.setClient(undefined)
-      ledgerApi.getPromotion()
+      ledgerApi.getPromotion(defaultAppState)
       assert(ledgergetPromotionSpy.calledOnce)
       assert(ledgerClient.calledOnce)
       ledgerApi.setClient(oldClient)
     })
 
+    it('empty client with existing wallet', function () {
+      const state = defaultAppState.setIn(['ledger', 'info', 'paymentId'], 'a-1-a')
+      const oldClient = ledgerApi.getClient()
+      ledgerApi.setClient(undefined)
+      ledgerApi.getPromotion(state)
+      assert(ledgergetPromotionSpy.withArgs(sinon.match.any, 'a-1-a', sinon.match.any).calledOnce)
+      assert(ledgerClient.calledOnce)
+      ledgerApi.setClient(oldClient)
+    })
+
     it('existing client', function () {
-      ledgerApi.getPromotion()
+      ledgerApi.getPromotion(defaultAppState)
       assert(ledgerClient.notCalled)
       assert(ledgergetPromotionSpy.calledOnce)
     })

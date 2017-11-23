@@ -279,9 +279,18 @@ const ledgerState = {
     return state.setIn(['ledger', 'info'], oldData.merge(data))
   },
 
-  resetInfo: (state) => {
+  resetInfo: (state, keep) => {
     state = validateState(state)
-    return state.setIn(['ledger', 'info'], Immutable.Map())
+    let newData = Immutable.Map()
+
+    if (keep) {
+      const paymentId = ledgerState.getInfoProp(state, 'paymentId')
+      if (paymentId) {
+        newData = newData.set('paymentId', paymentId)
+      }
+    }
+
+    return state.setIn(['ledger', 'info'], newData)
   },
 
   saveQRCode: (state, currency, image) => {

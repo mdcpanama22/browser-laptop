@@ -1102,12 +1102,16 @@ const enable = (state, paymentsEnabled) => {
     if (!promotionTimeoutId) {
       clearInterval(promotionTimeoutId)
     }
-    promotionTimeoutId = setInterval(getPromotion, 24 * ledgerUtil.milliseconds.hour)
+    promotionTimeoutId = setInterval(() => {
+      appActions.onPromotionGet()
+    }, 24 * ledgerUtil.milliseconds.hour)
 
     if (!togglePromotionTimeoutId) {
       clearTimeout(togglePromotionTimeoutId)
     }
-    togglePromotionTimeoutId = setTimeout(getPromotion, 15 * ledgerUtil.milliseconds.second)
+    togglePromotionTimeoutId = setTimeout(() => {
+      appActions.onPromotionGet()
+    }, 15 * ledgerUtil.milliseconds.second)
   } else if (paymentsEnabled) {
     // on toggle
     const promotion = ledgerState.getPromotionNotification(state)
@@ -1116,7 +1120,7 @@ const enable = (state, paymentsEnabled) => {
     }
 
     state = ledgerState.setActivePromotion(state, paymentsEnabled)
-    getPromotion()
+    getPromotion(state)
   }
 
   if (synopsis) {
@@ -1726,7 +1730,7 @@ const initialize = (state, paymentsEnabled) => {
   if (!paymentsEnabled) {
     client = null
     newClient = false
-    return ledgerState.resetInfo(state)
+    return ledgerState.resetInfo(state, true)
   }
 
   if (client) {
@@ -2390,14 +2394,18 @@ const onMediaPublisher = (state, mediaKey, response, duration, revisited) => {
   return state
 }
 
-const getPromotion = () => {
+const getPromotion = (state) => {
   let tempClient = client
+  let paymentId = null
   if (!tempClient) {
     clientprep()
     tempClient = ledgerClient(null, underscore.extend({roundtrip: roundtrip}, clientOptions), null)
+    paymentId = ledgerState.getInfoProp(state, 'paymentId')
   }
 
-  tempClient.getPromotion((err, result) => {
+  const lang = getSetting(settings.LANGUAGE)
+
+  tempClient.getPromotion(lang, paymentId, (err, result) => {
     if (err) {
       console.error('Error retrieving promotion', err.toString())
       return
@@ -2481,7 +2489,8 @@ const getMethods = () => {
     generatePaymentData,
     claimPromotion,
     onPromotionResponse,
-    getBalance
+    getBalance,
+    getPromotion
   }
 
   let privateMethods = {}
@@ -2517,8 +2526,7 @@ const getMethods = () => {
       synopsisNormalizer,
       checkVerifiedStatus,
       roundtrip,
-      observeTransactions,
-      getPromotion
+      observeTransactions
     }
   }
 

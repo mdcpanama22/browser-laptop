@@ -476,4 +476,37 @@ describe('ledgerState unit test', function () {
       assert.deepEqual(result.toJS(), expectedPromo.toJS())
     })
   })
+
+  describe('resetInfo', function () {
+    it('null case', function () {
+      const state = defaultState.setIn(['ledger', 'info'], Immutable.fromJS({
+        paymentId: 'a-1-a',
+        balance: 10.00
+      }))
+      const result = ledgerState.resetInfo(state)
+      const expectedState = defaultState.setIn(['ledger', 'info'], Immutable.Map())
+      assert.deepEqual(result.toJS(), expectedState.toJS())
+    })
+
+    it('keep is on, but paymentId is not there', function () {
+      const state = defaultState.setIn(['ledger', 'info'], Immutable.fromJS({
+        balance: 10.00
+      }))
+      const result = ledgerState.resetInfo(state, true)
+      const expectedState = defaultState.setIn(['ledger', 'info'], Immutable.Map())
+      assert.deepEqual(result.toJS(), expectedState.toJS())
+    })
+
+    it('keep it', function () {
+      const state = defaultState.setIn(['ledger', 'info'], Immutable.fromJS({
+        paymentId: 'a-1-a',
+        balance: 10.00
+      }))
+      const result = ledgerState.resetInfo(state, true)
+      const expectedState = defaultState.setIn(['ledger', 'info'], Immutable.fromJS({
+        paymentId: 'a-1-a'
+      }))
+      assert.deepEqual(result.toJS(), expectedState.toJS())
+    })
+  })
 })
