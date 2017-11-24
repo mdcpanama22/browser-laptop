@@ -82,19 +82,17 @@ class EnabledContent extends ImmutableComponent {
       return null
     }
 
-    return <div>
-      <BrowserButton
-        custom={[
-          styles.claimButton
-        ]}
-        secondaryColor
-        panelItem
-        testId={'claimButton'}
-        onClick={this.onClaimClick}
-        disabled={!ledgerData.get('created')}
-        label={promotion.getIn(['panel', 'optedInButton'])}
-      />
-    </div>
+    return <BrowserButton
+      custom={[
+        styles.claimButton
+      ]}
+      secondaryColor
+      panelItem
+      testId={'claimButton'}
+      onClick={this.onClaimClick}
+      disabled={!ledgerData.get('created')}
+      label={promotion.getIn(['panel', 'optedInButton'])}
+    />
   }
 
   ledgerDataErrorText () {
@@ -413,7 +411,7 @@ const styles = StyleSheet.create({
   },
 
   claimButton: {
-    marginTop: '-10px'
+    marginTop: '10px'
   },
 
   enabledContent: {
