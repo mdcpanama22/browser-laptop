@@ -43,6 +43,7 @@ describe('ledger api unit tests', function () {
   let onChangeSettingSpy
   let ledgersetPromotionSpy
   let ledgergetPromotionSpy
+  let ledgerSetTimeUntilReconcile
 
   const defaultAppState = Immutable.fromJS({
     cache: {
@@ -146,7 +147,8 @@ describe('ledger api unit tests', function () {
         return 0
       },
       getPromotion: () => {},
-      setPromotion: () => {}
+      setPromotion: () => {},
+      setTimeUntilReconcile: () => {}
     }
     ledgerClient.prototype.boolion = function (value) { return false }
     ledgerClient.prototype.getWalletPassphrase = function (state) {}
@@ -154,6 +156,7 @@ describe('ledger api unit tests', function () {
     ledgerTransitionedSpy = sinon.spy(lc, 'transitioned')
     ledgersetPromotionSpy = sinon.spy(lc, 'setPromotion')
     ledgergetPromotionSpy = sinon.spy(lc, 'getPromotion')
+    ledgerSetTimeUntilReconcile = sinon.spy(lc, 'setTimeUntilReconcile')
     ledgerClient.returns(lc)
     mockery.registerMock('bat-client', ledgerClient)
 
@@ -1394,8 +1397,13 @@ describe('ledger api unit tests', function () {
 
     before(function () {
       removeNotificationSpy = sinon.spy(ledgerNotificationsApi, 'removePromotionNotification')
+      ledgerSetTimeUntilReconcile.reset()
       getBalanceSpy = sinon.spy(ledgerApi, 'getBalance')
       fakeClock = sinon.useFakeTimers()
+    })
+
+    afterEach(function () {
+      ledgerSetTimeUntilReconcile.reset()
     })
 
     after(function () {
@@ -1412,6 +1420,22 @@ describe('ledger api unit tests', function () {
       assert(removeNotificationSpy.calledOnce)
       assert(getBalanceSpy.calledOnce)
       assert.deepEqual(result.toJS(), expectedSate.toJS())
+    })
+
+    it('set minReconcile timestamp if higher then current reconcileStamp', function () {
+      const state = defaultAppState
+        .setIn(['ledger', 'promotion', 'minimumReconcileTimestamp'], 10000)
+        .setIn(['ledger', 'info', 'reconcileStamp'], 100)
+      ledgerApi.onPromotionResponse(state)
+      assert(ledgerSetTimeUntilReconcile.calledOnce)
+    })
+
+    it('do not set minReconcile timestamp if lower then current reconcileStamp', function () {
+      const state = defaultAppState
+        .setIn(['ledger', 'promotion', 'minimumReconcileTimestamp'], 10000)
+        .setIn(['ledger', 'info', 'reconcileStamp'], 10001)
+      ledgerApi.onPromotionResponse(state)
+      assert(ledgerSetTimeUntilReconcile.notCalled)
     })
   })
 })

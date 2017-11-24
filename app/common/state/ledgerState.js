@@ -424,6 +424,16 @@ const ledgerState = {
     return state.setIn(['ledger', 'promotion', prop], value)
   },
 
+  getPromotionProp: (state, prop) => {
+    state = validateState(state)
+
+    if (prop == null) {
+      return null
+    }
+
+    return state.getIn(['ledger', 'promotion', prop])
+  },
+
   removePromotion: (state) => {
     state = validateState(state)
     return state.setIn(['ledger', 'promotion'], Immutable.Map())

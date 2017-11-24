@@ -509,4 +509,17 @@ describe('ledgerState unit test', function () {
       assert.deepEqual(result.toJS(), expectedState.toJS())
     })
   })
+
+  describe('getPromotionProp', function () {
+    it('null case', function () {
+      const result = ledgerState.getPromotionProp(defaultState)
+      assert.deepEqual(result, null)
+    })
+
+    it('prop is set', function () {
+      const state = defaultState.setIn(['ledger', 'promotion', 'promotionId'], '1')
+      const result = ledgerState.getPromotionProp(state, 'promotionId')
+      assert.deepEqual(result, '1')
+    })
+  })
 })

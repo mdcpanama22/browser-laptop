@@ -2439,6 +2439,21 @@ const onPromotionResponse = (state) => {
   ledgerNotifications.removePromotionNotification(state)
   state = ledgerState.setPromotionProp(state, 'claimedTimestamp', new Date().getTime())
 
+  const currentTimestamp = ledgerState.getInfoProp(state, 'reconcileStamp')
+  const minTimestamp = ledgerState.getPromotionProp(state, 'minimumReconcileTimestamp')
+
+  if (minTimestamp > currentTimestamp) {
+    client.setTimeUntilReconcile(minTimestamp, (err, stateResult) => {
+      if (err) return console.error('ledger setTimeUntilReconcile error: ' + err.toString())
+
+      if (!stateResult) {
+        return
+      }
+
+      appActions.onTimeUntilReconcile(stateResult)
+    })
+  }
+
   if (togglePromotionTimeoutId) {
     clearTimeout(togglePromotionTimeoutId)
   }

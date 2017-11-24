@@ -189,6 +189,7 @@ AppStore
     promotion: {
       activeState: string,
       claimedTimestamp: number,
+      minimumReconcileTimestamp: number,
       promotionId: number,
       remindTimestamp: number,
       stateWallet: {
