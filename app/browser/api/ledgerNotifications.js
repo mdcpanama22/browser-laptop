@@ -372,7 +372,10 @@ const showPromotionNotification = (state) => {
     return
   }
 
-  appActions.showNotification(notification.toJS())
+  const data = notification.toJS()
+  data.from = 'ledger'
+
+  appActions.showNotification(data)
 }
 
 const removePromotionNotification = (state) => {
