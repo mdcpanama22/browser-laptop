@@ -2310,7 +2310,7 @@ const onMediaRequest = (state, xhr, type, tabId) => {
     providerName: type
   }
 
-  ledgerPublisher.getMedia.getPublisherFromMediaProps(mediaProps, options, (error, response) => {
+  ledgerPublisher.getMedia().getPublisherFromMediaProps(mediaProps, options, (error, response) => {
     if (error) {
       console.error('Error while getting publisher from media', error.toString())
       return

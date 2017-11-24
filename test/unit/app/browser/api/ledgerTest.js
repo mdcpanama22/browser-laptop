@@ -167,8 +167,10 @@ describe('ledger api unit tests', function () {
         return null
       },
       Synopsis: batPublisher.Synopsis,
-      getMedia: {
-        getPublisherFromMediaProps: () => {}
+      getMedia: () => {
+        return {
+          getPublisherFromMediaProps: () => {}
+        }
       }
     }
     mockery.registerMock('bat-publisher', ledgerPublisher)
@@ -534,7 +536,7 @@ describe('ledger api unit tests', function () {
     })
 
     describe('onMediaRequest', function () {
-      let publisherFromMediaPropsSpy, saveVisitSpy
+      let mediaSpy, saveVisitSpy
 
       const cacheAppState = defaultAppState
         .setIn(['cache', 'ledgerVideos', videoId], Immutable.fromJS({
@@ -546,12 +548,12 @@ describe('ledger api unit tests', function () {
         }))
 
       beforeEach(function () {
-        publisherFromMediaPropsSpy = sinon.spy(ledgerPublisher.getMedia, 'getPublisherFromMediaProps')
+        mediaSpy = sinon.spy(ledgerPublisher, 'getMedia')
         saveVisitSpy = sinon.spy(ledgerApi, 'saveVisit')
       })
 
       afterEach(function () {
-        publisherFromMediaPropsSpy.restore()
+        mediaSpy.restore()
         saveVisitSpy.restore()
         ledgerApi.setCurrentMediaKey(null)
       })
@@ -563,7 +565,7 @@ describe('ledger api unit tests', function () {
       it('does nothing if input is null', function () {
         const result = ledgerApi.onMediaRequest(defaultAppState)
         assert.deepEqual(result.toJS(), defaultAppState.toJS())
-        assert(publisherFromMediaPropsSpy.notCalled)
+        assert(mediaSpy.notCalled)
         assert(saveVisitSpy.notCalled)
       })
 
@@ -587,7 +589,7 @@ describe('ledger api unit tests', function () {
         it('does nothing if tab is private', function () {
           const xhr2 = 'https://www.youtube.com/api/stats/watchtime?docid=kLiLOkzLetE&st=20.338&et=21.339'
           ledgerApi.onMediaRequest(cacheAppState, xhr2, ledgerMediaProviders.YOUTUBE, 1)
-          assert(publisherFromMediaPropsSpy.notCalled)
+          assert(mediaSpy.notCalled)
           assert(saveVisitSpy.notCalled)
         })
       })
@@ -595,13 +597,13 @@ describe('ledger api unit tests', function () {
       it('set currentMediaKey when it is different than saved', function () {
         ledgerApi.onMediaRequest(defaultAppState, xhr, ledgerMediaProviders.YOUTUBE, 1)
         assert.equal(ledgerApi.getCurrentMediaKey(), videoId)
-        assert(publisherFromMediaPropsSpy.calledOnce)
+        assert(mediaSpy.calledOnce)
         assert(saveVisitSpy.notCalled)
       })
 
       it('get data from cache, if we have publisher in synopsis', function () {
         ledgerApi.onMediaRequest(cacheAppState, xhr, ledgerMediaProviders.YOUTUBE, 1)
-        assert(publisherFromMediaPropsSpy.notCalled)
+        assert(mediaSpy.notCalled)
         assert(saveVisitSpy.withArgs(cacheAppState, publisherKey, {
           duration: 10001,
           revisited: false,
@@ -614,7 +616,7 @@ describe('ledger api unit tests', function () {
           publisher: publisherKey
         }))
         ledgerApi.onMediaRequest(state, xhr, ledgerMediaProviders.YOUTUBE, 1)
-        assert(publisherFromMediaPropsSpy.calledOnce)
+        assert(mediaSpy.calledOnce)
         assert(saveVisitSpy.notCalled)
       })
 
@@ -630,7 +632,7 @@ describe('ledger api unit tests', function () {
 
         // second call, revisit true
         ledgerApi.onMediaRequest(cacheAppState, xhr, ledgerMediaProviders.YOUTUBE, 1)
-        assert(publisherFromMediaPropsSpy.notCalled)
+        assert(mediaSpy.notCalled)
         assert(saveVisitSpy.withArgs(cacheAppState, publisherKey, {
           duration: 10001,
           revisited: false,
